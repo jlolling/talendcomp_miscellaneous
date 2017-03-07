@@ -1,0 +1,79 @@
+<%@ jet 
+	imports="
+		org.talend.core.model.process.INode 
+		org.talend.core.model.process.ElementParameterParser 
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.IConnectionCategory
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		org.talend.core.model.utils.NodeUtil
+		java.util.List
+	" 
+%>
+<% 
+    CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+    INode node = (INode) codeGenArgument.getArgument();
+    String cid = node.getUniqueName();
+	String locale = ElementParameterParser.getValue(node, "__LOCALE__");
+    if (locale == null || locale.trim().isEmpty()) {
+   		locale = "null";
+    }
+    String startDate = ElementParameterParser.getValue(node, "__START_DATE__");
+    boolean endAsDate = "true".equals(ElementParameterParser.getValue(node, "__END_AS_DATE__"));
+	String endDate = ElementParameterParser.getValue(node, "__END_DATE__");
+	String amountOfYears = ElementParameterParser.getValue(node, "__AMOUNT_YEARS__");
+	String outgoingConnName = null;
+	List<? extends IConnection> outConns = NodeUtil.getOutgoingConnections(node, IConnectionCategory.DATA);
+	if (outConns != null && outConns.isEmpty() == false) {
+	    IConnection outConn = outConns.get(0);
+	    outgoingConnName = outConn.getName();
+	}
+	String finYearStart = ElementParameterParser.getValue(node, "__FINANCIAL_YEAR_START_DATE__");
+%>
+	// build calendar instance
+	de.cimt.talendcomp.calendar.CalendarBuilder <%=cid%> = new de.cimt.talendcomp.calendar.CalendarBuilder();
+	try {
+	<%=cid%>.setLocale(<%=locale%>);
+<%  if (startDate != null && startDate.isEmpty() == false) { %>
+	<%=cid%>.setStartDate(<%=startDate%>);
+<%  } %>
+<%  if (endAsDate) { %>
+	<%=cid%>.setEndDate(<%=endDate%>);
+<%  } else { %>
+	<%=cid%>.setNumberYears(<%=amountOfYears%>);
+<%  } %>
+<%  if (finYearStart != null && finYearStart.trim().isEmpty() == false) { %>
+	<%=cid%>.setFinancialYearStartDate(<%=finYearStart%>);
+<%  } %>
+	<%=cid%>.initializeCalendar();
+	} catch (Exception e) {
+		globalMap.put("<%=cid%>_ERROR_MESSAGE", e.getMessage());
+		throw e;
+	}
+	int count_<%=cid%> = 0;
+<%  if (outgoingConnName != null) { %>
+	while (<%=cid%>.nextDay()) {
+		<%=outgoingConnName%>.DATE_AS_INT = <%=cid%>.getCurrentDateAsInt();
+		<%=outgoingConnName%>.DATE_AS_DATE = <%=cid%>.getCurrentDate();
+		<%=outgoingConnName%>.DAY_OF_YEAR_AS_INT = <%=cid%>.getCurrentDayOfYear();
+		<%=outgoingConnName%>.DAY_OF_WEEK_AS_INT = <%=cid%>.getCurrentDayOfWeek();
+		<%=outgoingConnName%>.WEEK_DAY_NAME = <%=cid%>.getCurrentWeekDayName();
+		<%=outgoingConnName%>.WEEK_DAY_SHORT_NAME = <%=cid%>.getCurrentWeekDayShortName();
+		<%=outgoingConnName%>.WEEK_AS_INT = <%=cid%>.getCurrentWeek();
+		<%=outgoingConnName%>.WEEK_START_DATE = <%=cid%>.getCurrentWeekStart();
+		<%=outgoingConnName%>.WEEK_END_DATE = <%=cid%>.getCurrentWeekEnd();
+		<%=outgoingConnName%>.YEAR_OF_WEEK_AS_INT = <%=cid%>.getCurrentWeekYear();
+		<%=outgoingConnName%>.DAY_OF_MONTH_AS_INT = <%=cid%>.getCurrentDayOfMonth();
+		<%=outgoingConnName%>.MONTH_AS_INT = <%=cid%>.getCurrentMonth();
+		<%=outgoingConnName%>.MONTH_NAME = <%=cid%>.getCurrentMonthName();
+		<%=outgoingConnName%>.MONTH_SHORT_NAME = <%=cid%>.getCurrentMonthShortName();
+		<%=outgoingConnName%>.MONTH_START_DATE = <%=cid%>.getCurrentMonthStart();
+		<%=outgoingConnName%>.MONTH_END_DATE = <%=cid%>.getCurrentMonthEnd();
+		<%=outgoingConnName%>.QUARTER_AS_INT = <%=cid%>.getCurrentQuarter();
+		<%=outgoingConnName%>.CAL_YEAR_AS_INT = <%=cid%>.getCurrentCalendarYear();
+		<%=outgoingConnName%>.FIN_YEAR_AS_INT = <%=cid%>.getFinancialYear();
+		<%=outgoingConnName%>.FIN_MONTH_AS_INT = <%=cid%>.getFinancialMonth();
+		<%=outgoingConnName%>.FIN_QUARTER_AS_INT = <%=cid%>.getFinancialQuarter();
+		<%=outgoingConnName%>.UTC_MILLISECONDS = <%=cid%>.getUTCMillisSeconds();
+		<%=outgoingConnName%>.IS_LAST_DAY_OF_MONTH = <%=cid%>.isLastDayOfMonth();
+<%  } %>
+
