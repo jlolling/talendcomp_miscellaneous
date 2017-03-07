@@ -1,0 +1,94 @@
+<%@ jet 
+	imports="
+		org.talend.core.model.process.INode 
+		org.talend.core.model.process.ElementParameterParser 
+		org.talend.core.model.metadata.IMetadataTable 
+		org.talend.core.model.metadata.IMetadataColumn 
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.IConnectionCategory
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		org.talend.core.model.metadata.types.JavaTypesManager
+		org.talend.core.model.metadata.types.JavaType
+		java.util.List
+		java.util.ArrayList
+    	java.util.Map
+        org.talend.core.model.process.IConnectionCategory
+        org.talend.core.model.utils.NodeUtil
+    " 
+%>
+<% 
+    CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+    INode node = (INode)codeGenArgument.getArgument();
+    String cid = node.getUniqueName();
+    String startColumn = ElementParameterParser.getValue(node, "__GROUP_START_COLUMN__");
+    String positionColumn = ElementParameterParser.getValue(node, "__POSITION_COLUMN__");
+    boolean usePositionColumn = (positionColumn != null && positionColumn.isEmpty() == false) && 
+    							"true".equals(ElementParameterParser.getValue(node, "__ACTIVATE_POSITION_COLUMN__"));
+    int groupSize = Integer.parseInt(ElementParameterParser.getValue(node, "__GROUP_SIZE__"));
+    int numberRepetition = Integer.parseInt(ElementParameterParser.getValue(node, "__NUMBER_REPEATION__"));
+	String incomingConnName = null;
+	String outgoingConnName = null;
+	IMetadataTable metadata = null;
+	List<? extends IConnection> inConns = node.getIncomingConnections();
+	if (inConns != null && inConns.isEmpty() == false) {
+    	IConnection inConn = inConns.get(0);
+    	incomingConnName = inConn.getName();
+    	metadata = inConn.getMetadataTable();
+	}
+	List<? extends IConnection> outConns = NodeUtil.getOutgoingConnections(node, IConnectionCategory.DATA);
+	if (outConns != null && outConns.isEmpty() == false) {
+    	IConnection outConn = outConns.get(0);
+    	outgoingConnName = outConn.getName();
+	}
+	if (metadata != null && incomingConnName != null && outgoingConnName != null) { %>
+	// helper class for tNormalizeSchema
+	final class NormalizeSchemaHelper_<%=cid%> {
+		
+		public void fill(<%=incomingConnName%>Struct in, <%=outgoingConnName%>Struct out, int numberRepetition) {
+<%      if (usePositionColumn) { %>
+		out.<%=positionColumn%> = numberRepetition;
+<%      }
+        List<IMetadataColumn> metadataColumns = metadata.getListColumns();
+        List<IMetadataColumn> groupColumns = new ArrayList<IMetadataColumn>();
+        int groupFieldIndex = 0;
+        int indexOfFirstGroupField = 0;
+        boolean inGroup = false;
+        for (int c = 0; c < metadataColumns.size(); c++) {
+        	IMetadataColumn column = metadataColumns.get(c);
+        	if (column.getLabel().equals(startColumn)) {
+				inGroup = true;
+				indexOfFirstGroupField = c;
+        	} 
+        	if (inGroup) groupFieldIndex++;
+			if (groupFieldIndex == 0 || groupFieldIndex > (groupSize * numberRepetition)) { %>
+	        out.<%=column.getLabel()%> = in.<%=column.getLabel()%>; // <%=groupFieldIndex%>
+<%          } else if (groupFieldIndex <= groupSize) {
+				groupColumns.add(column);
+			}
+        } %>
+	        // indexOfFirstGroupField: <%=indexOfFirstGroupField%>
+    	    // number of fields in group: <%=groupColumns.size()%>
+			switch (numberRepetition) {
+<%      for (int i = 0; i < numberRepetition; i++) { %>
+				case <%=i%>:
+<%          for (int c = 0; c < groupColumns.size(); c++) { 
+            	IMetadataColumn column = groupColumns.get(c);
+            	int sourceColumnIndex = (c + indexOfFirstGroupField) + (i * groupSize);
+            	if (sourceColumnIndex < metadataColumns.size()) {
+	            	IMetadataColumn sourceColumn = metadataColumns.get(sourceColumnIndex);	%>
+	        	    out.<%=column.getLabel()%> = in.<%=sourceColumn.getLabel()%>; // <%=sourceColumnIndex%>
+<%            	} else { %>
+					// wrong configuration of count of fields in group and/or number of repetitions
+					if (true) throw new Exception("wrong configuration of count of fields in group and/or number of repetitions");
+<%				}
+            } %>
+					break;			          
+<%      } // for %>
+        	} // end switch
+		} // end of fill
+		
+	} // end of class
+<%  } %>
+	final NormalizeSchemaHelper_<%=cid%> normalizeSchemaHelper_<%=cid%> = new NormalizeSchemaHelper_<%=cid%>();
+    int nb_line_in_<%=cid%> = 0;
+    int nb_line_out_<%=cid%> = 0;
