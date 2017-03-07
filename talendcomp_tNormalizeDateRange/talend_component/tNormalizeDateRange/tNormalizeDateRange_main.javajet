@@ -1,0 +1,53 @@
+<%@ jet 
+	imports="
+		org.talend.core.model.process.INode 
+		org.talend.core.model.process.ElementParameterParser 
+		org.talend.core.model.metadata.IMetadataTable 
+		org.talend.core.model.metadata.IMetadataColumn 
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.IConnectionCategory
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		java.util.List
+        org.talend.core.model.utils.NodeUtil
+    " 
+%>
+<% 
+   CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+   INode node = (INode)codeGenArgument.getArgument();
+   String cid = node.getUniqueName();
+   String startDateColumn = ElementParameterParser.getValue(node, "__DATE_RANGE_START_COLUMN__");
+   String endDateColumn = ElementParameterParser.getValue(node, "__DATE_RANGE_END_COLUMN__");
+   String currentDateColumn = ElementParameterParser.getValue(node, "__CURRENT_DATE_COLUMN__");
+   String incomingConnName = null;
+   String outgoingConnName = null;
+   IMetadataTable metadata = null;
+   List<? extends IConnection> inConns = node.getIncomingConnections();
+   if (inConns != null && inConns.isEmpty() == false) {
+       IConnection inConn = inConns.get(0);
+       incomingConnName = inConn.getName();
+   }
+   List<? extends IConnection> outConns = NodeUtil.getOutgoingConnections(node, IConnectionCategory.DATA);
+   if (outConns != null && outConns.isEmpty() == false) {
+       IConnection outConn = outConns.get(0);
+       outgoingConnName = outConn.getName();
+       metadata = outConn.getMetadataTable();
+   }
+   if (metadata != null && incomingConnName != null && outgoingConnName != null) { %>    	
+	nb_line_in_<%=cid%>++;
+	<%=cid%>.setDateRange(<%=incomingConnName%>.<%=startDateColumn%>, <%=incomingConnName%>.<%=endDateColumn%>);
+	int index_in_group_<%=cid%> = -1;
+	while (<%=cid%>.next()) {
+       nb_line_out_<%=cid%>++;
+       index_in_group_<%=cid%>++;
+       globalMap.put("<%=cid%>_INDEX_WITHIN_RANGE", index_in_group_<%=cid%>); 
+		 <%=outgoingConnName%> = new <%=outgoingConnName%>Struct();
+		 <%=outgoingConnName%>.<%=currentDateColumn%> = <%=cid%>.getNextDate();
+<% }
+   List<IMetadataColumn> metadataColumns = metadata.getListColumns();
+   for (int c = 0; c < metadataColumns.size(); c++) {
+        IMetadataColumn column = metadataColumns.get(c);
+        if (column.getLabel().equals(currentDateColumn) == false) { %>
+       <%=outgoingConnName%>.<%=column.getLabel()%> = <%=incomingConnName%>.<%=column.getLabel()%>;
+<%      }
+   } %>         
+    

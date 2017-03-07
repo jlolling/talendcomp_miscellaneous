@@ -1,0 +1,36 @@
+<%@ jet 
+	imports="
+		org.talend.core.model.process.INode 
+		org.talend.core.model.process.ElementParameterParser 
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.IConnectionCategory
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		java.util.List
+        org.talend.core.model.utils.NodeUtil
+    " 
+%>
+<% 
+	CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+	INode node = (INode)codeGenArgument.getArgument();
+	String cid = node.getUniqueName();
+	String incomingConnName = null;
+	String outgoingConnName = null;
+	List<? extends IConnection> inConns = node.getIncomingConnections();
+	if (inConns != null && inConns.isEmpty() == false) {
+		IConnection inConn = inConns.get(0);
+		incomingConnName = inConn.getName();
+	}
+	List<? extends IConnection> outConns = NodeUtil.getOutgoingConnections(node, IConnectionCategory.DATA);
+	if (outConns != null && outConns.isEmpty() == false) {
+		IConnection outConn = outConns.get(0);
+		outgoingConnName = outConn.getName();
+	}
+	boolean truncateDate = "true".equals(ElementParameterParser.getValue(node, "__TRUNCATE_CURRENT_DATE_TIME__"));
+	boolean excludeStartDate = "true".equals(ElementParameterParser.getValue(node, "__EXCLUDE_START_DATE__"));
+	if (incomingConnName != null && outgoingConnName != null) { %>
+	de.cimt.talendcomp.daterangenormalize.DateRangeNormalizer <%=cid%> = new de.cimt.talendcomp.daterangenormalize.DateRangeNormalizer();
+	<%=cid%>.setTruncateDate(<%=truncateDate%>);
+	<%=cid%>.excludeStartDate(<%=excludeStartDate%>);
+	int nb_line_in_<%=cid%> = 0;
+	int nb_line_out_<%=cid%> = 0;
+<%	} %>
