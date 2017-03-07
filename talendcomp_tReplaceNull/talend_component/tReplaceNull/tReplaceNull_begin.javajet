@@ -1,0 +1,123 @@
+<%@ jet 
+imports="
+    org.talend.core.model.process.INode
+    org.talend.core.model.metadata.IMetadataTable
+    org.talend.core.model.metadata.IMetadataColumn
+    org.talend.core.model.process.ElementParameterParser
+    org.talend.core.model.process.IConnection
+    org.talend.designer.codegen.config.CodeGeneratorArgument
+    java.util.List
+    java.util.ArrayList
+    java.util.Map
+    org.talend.core.model.process.IConnectionCategory
+"
+%>
+
+<%
+	CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+	INode node = (INode)codeGenArgument.getArgument();
+	String cid = node.getUniqueName();
+	String incomingConnName = null;
+	List<? extends IConnection> inConns = node.getIncomingConnections();
+	if (inConns != null && inConns.size() > 0) {
+    	IConnection inConn = inConns.get(0);
+    	incomingConnName = inConn.getName();
+	}
+	String outgoingConnName = null;
+	List<? extends IConnection> outgoingConns = node.getOutgoingSortedConnections();
+	if (outgoingConns != null && outgoingConns.size() > 0) {
+		IConnection conn = outgoingConns.get(0);
+    	if (conn.getLineStyle().hasConnectionCategory(IConnectionCategory.DATA)) {
+			outgoingConnName = conn.getName();
+		}
+	}
+	List<IMetadataColumn> listColumns = new ArrayList<IMetadataColumn>(); // dummy
+	List<IMetadataTable> metadatas = node.getMetadataList();
+	if (metadatas != null && metadatas.size() > 0) {
+		IMetadataTable metadata = metadatas.get(0);
+		if (metadata != null) {
+			listColumns = metadata.getListColumns();
+		}
+    }
+    boolean excludeKeyColumns = "true".equals(ElementParameterParser.getValue(node,"__IGNORE_NULL_VALUE_IN_KEYS__"));
+    List<Map<String, String>> substitutions = (List<Map<String,String>>) ElementParameterParser.getObjectValue(node,"__SUBSTITUTIONS__");
+    if (incomingConnName != null && outgoingConnName != null) { %>
+	// helper to transfer values with null check
+	final class Helper_<%=cid%> {
+	
+		public Object coalesce(Object value, Object columnDefaultValue, Object schemaDefaultValue, Object typeDefaultValue) {
+			if (value != null) {
+				return value;
+			} else if (columnDefaultValue != null) {
+				return columnDefaultValue;
+			} else if (schemaDefaultValue != null) {
+				return schemaDefaultValue;
+			} else {
+				return typeDefaultValue;
+			}
+		}
+	
+		/** fills the output flow with the input flow */
+		public void fill(<%=incomingConnName%>Struct input_row, <%=outgoingConnName%>Struct output_row) throws Exception {
+<%  for (int columnIndex = 0; columnIndex < listColumns.size(); columnIndex++) {
+		IMetadataColumn column = listColumns.get(columnIndex);
+		Map<String, String> entry = substitutions.get(columnIndex);
+		String columnName = column.getLabel();
+		String javaType = column.getTalendType().substring(3);
+		boolean enabled = "true".equals(entry.get("ENABLED"));
+		String columnDefaultValue = entry.get("REPLACEMENT");
+		if (columnDefaultValue == null || columnDefaultValue.trim().isEmpty()) {
+			columnDefaultValue = "null";
+		}
+		String schemaDefaultValue = column.getDefault();
+		if (schemaDefaultValue == null || schemaDefaultValue.trim().isEmpty()) {
+			schemaDefaultValue = "null";
+		}
+		String typeDefaultValue = ElementParameterParser.getValue(node,"__" + javaType.toUpperCase() + "_DEFAULT__");
+		if (typeDefaultValue == null || typeDefaultValue.trim().isEmpty()) {
+			typeDefaultValue = "null";
+		}
+		if (column.isNullable() == false) {
+			enabled = false;
+		}
+		if (excludeKeyColumns && column.isKey()) {
+			enabled = false;
+		}
+		if (enabled) {
+			if ("String".equals(javaType)) { %>
+			output_row.<%=columnName%> = (String) coalesce(input_row.<%=columnName%>, <%=columnDefaultValue%>, <%=schemaDefaultValue%>, <%=typeDefaultValue%>);
+<%  	    } else if ("Integer".equals(javaType)) { %>
+			output_row.<%=columnName%> = (Integer) coalesce(input_row.<%=columnName%>, <%=columnDefaultValue%>, <%=schemaDefaultValue%>, <%=typeDefaultValue%>);
+<%      	} else if ("Short".equals(javaType)) { %>
+			output_row.<%=columnName%> = (Short) coalesce(input_row.<%=columnName%>, <%=columnDefaultValue%>, <%=schemaDefaultValue%>, <%=typeDefaultValue%>);
+<%			} else if ("Long".equals(javaType)) { %>
+			output_row.<%=columnName%> = (Long) coalesce(input_row.<%=columnName%>, <%=columnDefaultValue%>, <%=schemaDefaultValue%>, <%=typeDefaultValue%>);
+<%  	    } else if ("BigDecimal".equals(javaType)) { %>
+			output_row.<%=columnName%> = (java.math.BigDecimal) coalesce(input_row.<%=columnName%>, <%=columnDefaultValue%>, <%=schemaDefaultValue%>, <%=typeDefaultValue%>);
+<%      	} else if ("Double".equals(javaType)) { %>
+			output_row.<%=columnName%> = (Double) coalesce(input_row.<%=columnName%>, <%=columnDefaultValue%>, <%=schemaDefaultValue%>, <%=typeDefaultValue%>);
+<%      	} else if ("Float".equals(javaType)) { %>
+			output_row.<%=columnName%> = (Float) coalesce(input_row.<%=columnName%>, <%=columnDefaultValue%>, <%=schemaDefaultValue%>, <%=typeDefaultValue%>);
+<%      	} else if ("Boolean".equals(javaType)) { %>
+			output_row.<%=columnName%> = (Boolean) coalesce(input_row.<%=columnName%>, <%=columnDefaultValue%>, <%=schemaDefaultValue%>, <%=typeDefaultValue%>);
+<%      	} else if ("Date".equals(javaType)) { %>
+			output_row.<%=columnName%> = (java.util.Date) coalesce(input_row.<%=columnName%>, <%=columnDefaultValue%>, <%=schemaDefaultValue%>, <%=typeDefaultValue%>);
+<%      	} else if ("Character".equals(javaType)) { %>
+			output_row.<%=columnName%> = (Character) coalesce(input_row.<%=columnName%>, <%=columnDefaultValue%>, <%=schemaDefaultValue%>, <%=typeDefaultValue%>);
+<%      	} else if ("Object".equals(javaType)) { %>
+			output_row.<%=columnName%> = coalesce(input_row.<%=columnName%>, <%=columnDefaultValue%>, <%=schemaDefaultValue%>, <%=typeDefaultValue%>);
+<%      	} else { %>
+			// <%=javaType%> cannot be checked
+			output_row.<%=columnName%> = input_row.<%=columnName%>;
+<%      	} %> 	
+<%      } else { %>
+			output_row.<%=column%> = input_row.<%=column%>;
+<%      }
+	} %>
+		} // end of fill
+	
+	} // end of class
+	final Helper_<%=cid%> helper_<%=cid%> = new Helper_<%=cid%>();
+<% } %>
+	int nb_line_<%=cid%> = 0;
+	
