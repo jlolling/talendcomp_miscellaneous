@@ -1,106 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<COMPONENT>
-	<HEADER 
-	    PLATEFORM="ALL" 
-	    SERIAL="" 
-	    VERSION="1.2" 
-	    STATUS="PROD"
-		COMPATIBILITY="ALL" 
-		AUTHOR="cimt AG" 
-		RELEASE_DATE="20140916A"
-		HAS_CONDITIONAL_OUTPUTS="true"
-		STARTABLE="true">
-		<SIGNATURE />
-	</HEADER>
-
-	<FAMILIES>
-		<FAMILY>Business_Intelligence</FAMILY>
-	</FAMILIES>
-
-	<DOCUMENTATION>
-		<URL />
-	</DOCUMENTATION>
-
-	<CONNECTORS>
-		<CONNECTOR CTYPE="FLOW" MAX_INPUT="0" MAX_OUTPUT="1" />
-		<CONNECTOR CTYPE="ITERATE" MAX_INPUT="1" MAX_OUTPUT="0" />
-		<CONNECTOR CTYPE="SUBJOB_OK" MAX_INPUT="1" MAX_OUTPUT="1" />
-		<CONNECTOR CTYPE="SUBJOB_ERROR" MAX_INPUT="1" MAX_OUTPUT="1" />
-		<CONNECTOR CTYPE="COMPONENT_OK" />
-		<CONNECTOR CTYPE="COMPONENT_ERROR" />
-	</CONNECTORS>
-	<PARAMETERS>
-		<PARAMETER NAME="SCHEMA" FIELD="SCHEMA_TYPE"
-			REQUIRED="true" NUM_ROW="10" >
-			<TABLE READONLY="true">
-				<COLUMN NAME="DATE_AS_INT" TYPE="id_Integer" READONLY="true"
-					CUSTOM="true" LENGTH="8" KEY="true" NULLABLE="false" COMMENT="Date as integer"/>
-				<COLUMN NAME="DATE_AS_DATE" TYPE="id_Date" READONLY="true"
-					CUSTOM="true" LENGTH="10" PATTERN="&quot;yyyy-MM-dd&quot;" KEY="false" NULLABLE="false" COMMENT="Date in date type"/>
-				<COLUMN NAME="DAY_OF_YEAR_AS_INT" TYPE="id_Integer" READONLY="true"
-					CUSTOM="true" LENGTH="3" NULLABLE="false" COMMENT="Day index starts with 1"/>
-				<COLUMN NAME="DAY_OF_WEEK_AS_INT" TYPE="id_Integer" READONLY="true"
-					CUSTOM="true" LENGTH="2" NULLABLE="false" COMMENT="Index of the week day starts with 1"/>
-				<COLUMN NAME="WEEK_DAY_NAME" TYPE="id_String" READONLY="true"
-					CUSTOM="true" LENGTH="64" NULLABLE="false" COMMENT="Week day name localized"/>
-				<COLUMN NAME="WEEK_DAY_SHORT_NAME" TYPE="id_String" READONLY="true"
-					CUSTOM="true" LENGTH="10" NULLABLE="false" COMMENT="Week day short name localized"/>
-				<COLUMN NAME="WEEK_AS_INT" TYPE="id_Integer" READONLY="true"
-					CUSTOM="true" LENGTH="2" NULLABLE="false" COMMENT="ISO Week number"/>
-				<COLUMN NAME="WEEK_START_DATE" TYPE="id_Date" PATTERN="&quot;yyyy-MM-dd&quot;" READONLY="true"
-					CUSTOM="true" LENGTH="10" NULLABLE="false" COMMENT="Start date of the week for the day"/>
-				<COLUMN NAME="WEEK_END_DATE" TYPE="id_Date" PATTERN="&quot;yyyy-MM-dd&quot;" READONLY="true"
-					CUSTOM="true" LENGTH="10" NULLABLE="false" COMMENT="End date of the week for the day"/>
-				<COLUMN NAME="YEAR_OF_WEEK_AS_INT" TYPE="id_Integer" READONLY="true"
-					CUSTOM="true" LENGTH="4" NULLABLE="false" COMMENT="Year of the week"/>
-				<COLUMN NAME="DAY_OF_MONTH_AS_INT" TYPE="id_Integer" READONLY="true"
-					CUSTOM="true" LENGTH="2" NULLABLE="false" COMMENT="Day within the month starts with 1"/>
-				<COLUMN NAME="MONTH_AS_INT" TYPE="id_Integer" READONLY="true"
-					CUSTOM="true" LENGTH="2" NULLABLE="false" COMMENT="Month as integer starts with 1"/>
-				<COLUMN NAME="MONTH_NAME" TYPE="id_String" READONLY="true"
-					CUSTOM="true" LENGTH="64" NULLABLE="false" COMMENT="Month name localized"/>
-				<COLUMN NAME="MONTH_SHORT_NAME" TYPE="id_String" READONLY="true"
-					CUSTOM="true" LENGTH="10" NULLABLE="false" COMMENT="Month short name localized"/>
-				<COLUMN NAME="MONTH_START_DATE" TYPE="id_Date" PATTERN="&quot;yyyy-MM-dd&quot;" READONLY="true"
-					CUSTOM="true" LENGTH="10" NULLABLE="false" COMMENT="Start date of the month for the day"/>
-				<COLUMN NAME="MONTH_END_DATE" TYPE="id_Date" PATTERN="&quot;yyyy-MM-dd&quot;" READONLY="true"
-					CUSTOM="true" LENGTH="10" NULLABLE="false" COMMENT="End date of the month for the day"/>
-				<COLUMN NAME="QUARTER_AS_INT" TYPE="id_Integer" READONLY="true"
-					CUSTOM="true" LENGTH="2" NULLABLE="false" COMMENT="Quarter index starts with 1"/>
-				<COLUMN NAME="CAL_YEAR_AS_INT" TYPE="id_Integer" READONLY="true"
-					CUSTOM="true" LENGTH="4" NULLABLE="false" COMMENT="Year of the calendar day"/>
-				<COLUMN NAME="FIN_YEAR_AS_INT" TYPE="id_Integer" READONLY="true"
-					CUSTOM="true" LENGTH="4" NULLABLE="false" COMMENT="Fiscal year of the calendar day"/>
-				<COLUMN NAME="FIN_MONTH_AS_INT" TYPE="id_Integer" READONLY="true"
-					CUSTOM="true" LENGTH="2" NULLABLE="false" COMMENT="Fiscal month as integer starts with 1"/>
-				<COLUMN NAME="FIN_QUARTER_AS_INT" TYPE="id_Integer" READONLY="true"
-					CUSTOM="true" LENGTH="2" NULLABLE="false" COMMENT="Fiscal quarter index starts with 1"/>
-				<COLUMN NAME="UTC_MILLISECONDS" TYPE="id_Long" READONLY="true"
-					CUSTOM="true" LENGTH="18" NULLABLE="false" COMMENT="UTC milliseconds of start the of the day"/>
-				<COLUMN NAME="IS_LAST_DAY_OF_MONTH" TYPE="id_Boolean" READONLY="true"
-					CUSTOM="true" LENGTH="1" NULLABLE="false" COMMENT="Is the last day of month"/>
-			</TABLE>
-		</PARAMETER>
-		<PARAMETER FIELD="TEXT" NAME="LOCALE" NUM_ROW="15"/>
-		<PARAMETER FIELD="TEXT" NAME="FINANCIAL_YEAR_START_DATE" NUM_ROW="17"/>
-		<PARAMETER FIELD="TEXT" NAME="START_DATE" NUM_ROW="20" REQUIRED="true"/>
-		<PARAMETER FIELD="CHECK" NAME="END_AS_DATE" NUM_ROW="30" REQUIRED="true">
-			<DEFAULT>false</DEFAULT>
-		</PARAMETER>
-		<PARAMETER FIELD="TEXT" NAME="END_DATE" NUM_ROW="30" REQUIRED="true" SHOW_IF="END_AS_DATE == 'true'"/>
-		<PARAMETER FIELD="TEXT" NAME="AMOUNT_YEARS" NUM_ROW="30" REQUIRED="true" SHOW_IF="END_AS_DATE == 'false'">
-			<DEFAULT>2</DEFAULT>
-		</PARAMETER>
-	</PARAMETERS>
-	<ADVANCED_PARAMETERS>
-	</ADVANCED_PARAMETERS>
-	<CODEGENERATION>
-		<IMPORTS>
-			<IMPORT NAME="cimt_Calendar" MODULE="cimt-talendcomp-calendar-1.2.jar" REQUIRED="true" />
-		</IMPORTS>
-	</CODEGENERATION>
-	<RETURNS>
-		<RETURN AVAILABILITY="AFTER" NAME="NB_LINE" TYPE="id_Integer" />
-	</RETURNS>
+<COMPONENT> 
+  <HEADER PLATEFORM="ALL" SERIAL="" VERSION="1.4" STATUS="PROD" COMPATIBILITY="ALL" AUTHOR="cimt AG" RELEASE_DATE="20211028" HAS_CONDITIONAL_OUTPUTS="true" STARTABLE="true"> 
+    <SIGNATURE/> 
+  </HEADER>  
+  <FAMILIES> 
+    <FAMILY>Business_Intelligence</FAMILY> 
+  </FAMILIES>  
+  <DOCUMENTATION> 
+    <URL/> 
+  </DOCUMENTATION>  
+  <CONNECTORS> 
+    <CONNECTOR CTYPE="FLOW" MAX_INPUT="0" MAX_OUTPUT="1"/>  
+    <CONNECTOR CTYPE="ITERATE" MAX_INPUT="1" MAX_OUTPUT="0"/>  
+    <CONNECTOR CTYPE="SUBJOB_OK" MAX_INPUT="1" MAX_OUTPUT="1"/>  
+    <CONNECTOR CTYPE="SUBJOB_ERROR" MAX_INPUT="1" MAX_OUTPUT="1"/>  
+    <CONNECTOR CTYPE="COMPONENT_OK"/>  
+    <CONNECTOR CTYPE="COMPONENT_ERROR"/> 
+  </CONNECTORS>  
+  <PARAMETERS> 
+    <PARAMETER NAME="SCHEMA" FIELD="SCHEMA_TYPE" REQUIRED="true" NUM_ROW="10"> 
+      <TABLE READONLY="true"> 
+        <COLUMN NAME="DATE_AS_INT" TYPE="id_Integer" READONLY="true" CUSTOM="true" LENGTH="8" KEY="true" NULLABLE="false" COMMENT="Date as integer"/>  
+        <COLUMN NAME="DATE_AS_DATE" TYPE="id_Date" READONLY="true" CUSTOM="true" LENGTH="10" PATTERN="&quot;yyyy-MM-dd&quot;" KEY="false" NULLABLE="false" COMMENT="Date in date type"/>  
+        <COLUMN NAME="DAY_OF_YEAR_AS_INT" TYPE="id_Integer" READONLY="true" CUSTOM="true" LENGTH="3" NULLABLE="false" COMMENT="Day index starts with 1"/>  
+        <COLUMN NAME="DAY_OF_WEEK_AS_INT" TYPE="id_Integer" READONLY="true" CUSTOM="true" LENGTH="2" NULLABLE="false" COMMENT="Index of the week day starts with 1"/>  
+        <COLUMN NAME="WEEK_DAY_NAME" TYPE="id_String" READONLY="true" CUSTOM="true" LENGTH="64" NULLABLE="false" COMMENT="Week day name localized"/>  
+        <COLUMN NAME="WEEK_DAY_SHORT_NAME" TYPE="id_String" READONLY="true" CUSTOM="true" LENGTH="10" NULLABLE="false" COMMENT="Week day short name localized"/>  
+        <COLUMN NAME="WEEK_AS_INT" TYPE="id_Integer" READONLY="true" CUSTOM="true" LENGTH="2" NULLABLE="false" COMMENT="ISO Week number"/>  
+        <COLUMN NAME="WEEK_START_DATE" TYPE="id_Date" PATTERN="&quot;yyyy-MM-dd&quot;" READONLY="true" CUSTOM="true" LENGTH="10" NULLABLE="false" COMMENT="Start date of the week for the day"/>  
+        <COLUMN NAME="WEEK_END_DATE" TYPE="id_Date" PATTERN="&quot;yyyy-MM-dd&quot;" READONLY="true" CUSTOM="true" LENGTH="10" NULLABLE="false" COMMENT="End date of the week for the day"/>  
+        <COLUMN NAME="YEAR_OF_WEEK_AS_INT" TYPE="id_Integer" READONLY="true" CUSTOM="true" LENGTH="4" NULLABLE="false" COMMENT="Year of the week"/>  
+        <COLUMN NAME="DAY_OF_MONTH_AS_INT" TYPE="id_Integer" READONLY="true" CUSTOM="true" LENGTH="2" NULLABLE="false" COMMENT="Day within the month starts with 1"/>  
+        <COLUMN NAME="MONTH_AS_INT" TYPE="id_Integer" READONLY="true" CUSTOM="true" LENGTH="2" NULLABLE="false" COMMENT="Month as integer starts with 1"/>  
+        <COLUMN NAME="MONTH_NAME" TYPE="id_String" READONLY="true" CUSTOM="true" LENGTH="64" NULLABLE="false" COMMENT="Month name localized"/>  
+        <COLUMN NAME="MONTH_SHORT_NAME" TYPE="id_String" READONLY="true" CUSTOM="true" LENGTH="10" NULLABLE="false" COMMENT="Month short name localized"/>  
+        <COLUMN NAME="MONTH_START_DATE" TYPE="id_Date" PATTERN="&quot;yyyy-MM-dd&quot;" READONLY="true" CUSTOM="true" LENGTH="10" NULLABLE="false" COMMENT="Start date of the month for the day"/>  
+        <COLUMN NAME="MONTH_END_DATE" TYPE="id_Date" PATTERN="&quot;yyyy-MM-dd&quot;" READONLY="true" CUSTOM="true" LENGTH="10" NULLABLE="false" COMMENT="End date of the month for the day"/>  
+        <COLUMN NAME="QUARTER_AS_INT" TYPE="id_Integer" READONLY="true" CUSTOM="true" LENGTH="2" NULLABLE="false" COMMENT="Quarter index starts with 1"/>  
+        <COLUMN NAME="CAL_YEAR_AS_INT" TYPE="id_Integer" READONLY="true" CUSTOM="true" LENGTH="4" NULLABLE="false" COMMENT="Year of the calendar day"/>  
+        <COLUMN NAME="FIN_YEAR_AS_INT" TYPE="id_Integer" READONLY="true" CUSTOM="true" LENGTH="4" NULLABLE="false" COMMENT="Fiscal year of the calendar day"/>  
+        <COLUMN NAME="FIN_MONTH_AS_INT" TYPE="id_Integer" READONLY="true" CUSTOM="true" LENGTH="2" NULLABLE="false" COMMENT="Fiscal month as integer starts with 1"/>  
+        <COLUMN NAME="FIN_QUARTER_AS_INT" TYPE="id_Integer" READONLY="true" CUSTOM="true" LENGTH="2" NULLABLE="false" COMMENT="Fiscal quarter index starts with 1"/>  
+        <COLUMN NAME="UTC_MILLISECONDS" TYPE="id_Long" READONLY="true" CUSTOM="true" LENGTH="18" NULLABLE="false" COMMENT="UTC milliseconds of start the of the day"/>  
+        <COLUMN NAME="IS_LAST_DAY_OF_MONTH" TYPE="id_Boolean" READONLY="true" CUSTOM="true" LENGTH="1" NULLABLE="false" COMMENT="Is the last day of month"/> 
+      </TABLE> 
+    </PARAMETER>  
+    <PARAMETER FIELD="TEXT" NAME="LOCALE" NUM_ROW="15"/>  
+    <PARAMETER FIELD="TEXT" NAME="FINANCIAL_YEAR_START_DATE" NUM_ROW="17"/>  
+    <PARAMETER FIELD="TEXT" NAME="START_DATE" NUM_ROW="20" REQUIRED="true"/>  
+    <PARAMETER FIELD="CHECK" NAME="END_AS_DATE" NUM_ROW="30" REQUIRED="true"> 
+      <DEFAULT>false</DEFAULT> 
+    </PARAMETER>  
+    <PARAMETER FIELD="TEXT" NAME="END_DATE" NUM_ROW="30" REQUIRED="true" SHOW_IF="END_AS_DATE == 'true'"/>  
+    <PARAMETER FIELD="TEXT" NAME="AMOUNT_YEARS" NUM_ROW="30" REQUIRED="true" SHOW_IF="END_AS_DATE == 'false'"> 
+      <DEFAULT>2</DEFAULT> 
+    </PARAMETER> 
+  </PARAMETERS>  
+  <ADVANCED_PARAMETERS> 
+    <PARAMETER NAME="RELEASE_LABEL_20211028" FIELD="LABEL" COLOR="0;0;0" NUM_ROW="900">
+      <DEFAULT>Release: 1.4 build at: 20211028</DEFAULT>
+    </PARAMETER>
+  </ADVANCED_PARAMETERS>  
+  <CODEGENERATION> 
+    <IMPORTS> 
+      <IMPORT NAME="jlo-talendcomp-calendar" MODULE="jlo-talendcomp-calendar-1.4.jar" MVN="mvn:org.talend.libraries/jlo-talendcomp-calendar-1.4/6.0.0-SNAPSHOT" REQUIRED="true"/>
+    </IMPORTS> 
+  </CODEGENERATION>  
+  <RETURNS> 
+    <RETURN AVAILABILITY="AFTER" NAME="NB_LINE" TYPE="id_Integer"/> 
+  </RETURNS>
 </COMPONENT>

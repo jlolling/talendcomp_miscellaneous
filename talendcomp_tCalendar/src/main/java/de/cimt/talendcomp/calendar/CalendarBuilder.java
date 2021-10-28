@@ -20,8 +20,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import de.cimt.talendcomp.GenericDateUtil;
-
 public class CalendarBuilder {
 	
 	private Date startDate;
